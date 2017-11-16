@@ -12,6 +12,7 @@ connection.connect(function(err) {
   start();
 });
 
+//Customer View - Function will allow customer to see all items available for purchase
 function start() {
   connection.query("SELECT * FROM bamazon", function(err, results) {
     if (err) throw err;
@@ -21,7 +22,10 @@ function start() {
       order(results);
     })
 }
+////////////////////////////////////////////////////////////////////////////////
 
+//Purchase Menu - Function will allow customer to select which Item, based on the Item ID, they would
+//like to purchase
 function order(results){
   inquirer.
     prompt([{
@@ -31,13 +35,14 @@ function order(results){
     }]).then(function(answer){
       // console.log(answer.choice);
         if(answer.choice.toUpperCase() == "Q"){
-          connection.end();
+          connection.end(); //Ends the application
         }
       for(var i = 0; i<results.length; i++){
         if(results[i].id == answer.choice){
           // console.log(results[i].id);
           var idNum = answer.choice;
           console.log(idNum);
+          //Prompts user to input how many of selected item they would like to purchase
           inquirer.
             prompt({
               type: "input",
@@ -48,14 +53,14 @@ function order(results){
                 // console.log(results[idNum-1].stock_quantity);
                 connection.query("UPDATE bamazon SET stock_quantity="+
                   (results[idNum-1].stock_quantity-answer.amount)+" WHERE id = "+idNum,
-                  function(error, res){
-                    console.log("Order success! Your total charge is: $"+(results[idNum-1].price*answer.amount));
+                  function(error, res){   //Updates mySQL database to reflect changes in stock_quantity based on the amount purchased
+                    console.log("Order success! Your total charge is: $"+(results[idNum-1].price*answer.amount)); //adds the total amount purchased.
                     start();
                   });
               }
               else{
                 console.log("There's not enough in stock to complete your purchase. Please select again");
-                start();
+                start(); //Sends customer back to the Items view with updated stock_quantity
               }
             })
         }
